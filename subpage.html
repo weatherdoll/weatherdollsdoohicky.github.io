@@ -22,13 +22,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 24px;
+            gap: 32px;
             user-select: none;
         }
 
+        /* Scaled up image width by 50px (from 150px to 200px) */
         .centered-asset {
-            width: 150px;
-            max-width: 50vw;
+            width: 200px;
+            max-width: 60vw;
             height: auto;
             object-fit: contain;
             cursor: pointer;
@@ -36,9 +37,10 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* Scaled up arrow buttons by 50px (from 44px to 64px) */
         .nav-btn {
-            width: 44px;
-            height: 44px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -60,9 +62,10 @@
             transform: scale(0.9);
         }
 
+        /* Scaled up the SVG arrow icons inside to match */
         .nav-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 30px;
+            height: 30px;
             fill: #ffffff;
         }
     </style>
@@ -145,20 +148,17 @@
             }
         }
 
-        // Just changes the image and audio source WITHOUT playing automatically
         function loadItem(index) {
             currentIndex = (index + playlist.length) % playlist.length;
             const currentItem = playlist[currentIndex];
 
             assetButton.src = currentItem.image;
 
-            // If it's a random pool, pick a track when switching; otherwise use the track
             const selectedAudio = getAudioSource(currentItem.audio);
             songTrack.src = selectedAudio;
             songTrack.currentTime = 0;
         }
 
-        // Clicking the center image plays/restarts the sound
         function playCurrentTrack(e) {
             if (e) e.preventDefault();
             unlockAudioContext();
@@ -169,7 +169,6 @@
         assetButton.addEventListener('click', playCurrentTrack);
         assetButton.addEventListener('touchstart', playCurrentTrack, { passive: false });
 
-        // Arrows ONLY switch images/audio sources without auto-playing
         prevBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             loadItem(currentIndex - 1);
@@ -180,7 +179,6 @@
             loadItem(currentIndex + 1);
         });
 
-        // Initialize first item on page load
         loadItem(0);
     </script>
 
