@@ -34,24 +34,6 @@
             cursor: pointer;
             image-rendering: pixelated;
             -webkit-tap-highlight-color: transparent;
-            transition: transform 0.1s ease;
-        }
-
-        .centered-asset:active {
-            transform: scale(0.95);
-        }
-
-        /* Fallback text style if image fails to load */
-        #error-fallback {
-            display: none;
-            color: #ff4d4d;
-            border: 1px dashed #ff4d4d;
-            padding: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-            max-width: 250px;
-            background: rgba(255, 0, 0, 0.1);
-            border-radius: 8px;
         }
 
         .nav-btn {
@@ -93,11 +75,8 @@
             <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
         </button>
 
-        <!-- Centered Interactive PNG/GIF & Error Box -->
-        <div>
-            <img id="interactive-asset" src="" alt="Centered Asset" class="centered-asset">
-            <div id="error-fallback">Image not found: <span id="missing-filename"></span></div>
-        </div>
+        <!-- Centered Interactive PNG/GIF (Clicking this plays the sound) -->
+        <img id="interactive-asset" src="" alt="Centered Asset" class="centered-asset">
 
         <!-- Right Arrow Circle -->
         <button id="next-btn" class="nav-btn" aria-label="Next">
@@ -138,8 +117,6 @@
 
         const songTrack = document.getElementById('single-track');
         const assetButton = document.getElementById('interactive-asset');
-        const errorFallback = document.getElementById('error-fallback');
-        const missingFilename = document.getElementById('missing-filename');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
 
@@ -168,53 +145,43 @@
             }
         }
 
-        function loadItem(index, shouldPlay = true) {
-            unlockAudioContext();
-
+        // Just changes the image and audio source WITHOUT playing automatically
+        function loadItem(index) {
             currentIndex = (index + playlist.length) % playlist.length;
             const currentItem = playlist[currentIndex];
 
-            // Reset image display and hide error first
-            errorFallback.style.display = 'none';
-            assetButton.style.display = 'block';
             assetButton.src = currentItem.image;
 
-            // Audio Source
+            // If it's a random pool, pick a track when switching; otherwise use the track
             const selectedAudio = getAudioSource(currentItem.audio);
             songTrack.src = selectedAudio;
             songTrack.currentTime = 0;
-
-            if (shouldPlay) {
-                songTrack.play().catch(err => console.log("Audio play blocked:", err));
-            }
         }
 
-        // Catch if the image fails to load from the folder
-        assetButton.onerror = function() {
-            assetButton.style.display = 'none';
-            missingFilename.textContent = playlist[currentIndex].image;
-            errorFallback.style.display = 'block';
-        };
-
+        // Clicking the center image plays/restarts the sound
         function playCurrentTrack(e) {
             if (e) e.preventDefault();
-            loadItem(currentIndex, true);
+            unlockAudioContext();
+            songTrack.currentTime = 0;
+            songTrack.play().catch(err => console.log("Audio play blocked:", err));
         }
 
         assetButton.addEventListener('click', playCurrentTrack);
         assetButton.addEventListener('touchstart', playCurrentTrack, { passive: false });
 
+        // Arrows ONLY switch images/audio sources without auto-playing
         prevBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            loadItem(currentIndex - 1, true);
+            loadItem(currentIndex - 1);
         });
 
         nextBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            loadItem(currentIndex + 1, true);
+            loadItem(currentIndex + 1);
         });
 
-        loadItem(0, false);
+        // Initialize first item on page load
+        loadItem(0);
     </script>
 
 </body>
