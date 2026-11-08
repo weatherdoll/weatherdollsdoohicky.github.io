@@ -26,44 +26,36 @@
             user-select: none;
         }
 
-        /* Scaled up image width by 50px (from 150px to 200px) */
+        /* Standard link wrapper for the image */
+        .asset-link {
+            display: inline-block;
+            line-height: 0;
+            cursor: pointer;
+        }
+
         .centered-asset {
             width: 200px;
             max-width: 60vw;
             height: auto;
             object-fit: contain;
-            cursor: pointer;
             image-rendering: pixelated;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        /* Scaled up arrow buttons by 50px (from 44px to 64px) */
-        .nav-btn {
+        /* Standard link wrapper for the arrow buttons */
+        .nav-link {
             width: 64px;
             height: 64px;
             border-radius: 50%;
             background-color: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
+            text-decoration: none;
             cursor: pointer;
-            outline: none;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            -webkit-tap-highlight-color: transparent;
         }
 
-        .nav-btn:hover {
-            background-color: rgba(255, 255, 255, 0.25);
-        }
-
-        .nav-btn:active {
-            transform: scale(0.9);
-        }
-
-        /* Scaled up the SVG arrow icons inside to match */
-        .nav-btn svg {
+        .nav-link svg {
             width: 30px;
             height: 30px;
             fill: #ffffff;
@@ -73,18 +65,20 @@
 <body>
 
     <div class="stage-container">
-        <!-- Left Arrow Circle -->
-        <button id="prev-btn" class="nav-btn" aria-label="Previous">
+        <!-- Left Arrow as a standard Link -->
+        <a href="#" id="prev-btn" class="nav-link" aria-label="Previous">
             <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
-        </button>
+        </a>
 
-        <!-- Centered Interactive PNG/GIF (Clicking this plays the sound) -->
-        <img id="interactive-asset" src="" alt="Centered Asset" class="centered-asset">
+        <!-- Centered PNG/GIF inside a standard link -->
+        <a href="#" id="asset-link" class="asset-link">
+            <img id="interactive-asset" src="" alt="Centered Asset" class="centered-asset">
+        </a>
 
-        <!-- Right Arrow Circle -->
-        <button id="next-btn" class="nav-btn" aria-label="Next">
+        <!-- Right Arrow as a standard Link -->
+        <a href="#" id="next-btn" class="nav-link" aria-label="Next">
             <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
-        </button>
+        </a>
     </div>
 
     <!-- AUDIO SYSTEM -->
@@ -119,6 +113,7 @@
         let audioPipelineActive = false;
 
         const songTrack = document.getElementById('single-track');
+        const assetLink = document.getElementById('asset-link');
         const assetButton = document.getElementById('interactive-asset');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
@@ -159,23 +154,23 @@
             songTrack.currentTime = 0;
         }
 
-        function playCurrentTrack(e) {
-            if (e) e.preventDefault();
+        // Clicking the image link plays/restarts the sound
+        assetLink.addEventListener('click', (e) => {
+            e.preventDefault();
             unlockAudioContext();
             songTrack.currentTime = 0;
             songTrack.play().catch(err => console.log("Audio play blocked:", err));
-        }
+        });
 
-        assetButton.addEventListener('click', playCurrentTrack);
-        assetButton.addEventListener('touchstart', playCurrentTrack, { passive: false });
-
+        // Left Arrow link click
         prevBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.preventDefault();
             loadItem(currentIndex - 1);
         });
 
+        // Right Arrow link click
         nextBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
+            e.preventDefault();
             loadItem(currentIndex + 1);
         });
 
