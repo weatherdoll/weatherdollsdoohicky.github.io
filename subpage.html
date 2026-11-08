@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>placeholder</title>
+    <title>Interactive Media Switcher</title>
     <style>
         /* Creates a perfectly centered pitch-black canvas void */
         html, body {
@@ -16,64 +16,188 @@
             justify-content: center;
             align-items: center;
             overflow: hidden;
+            font-family: sans-serif;
         }
 
-        /* Smaller sizing configuration for your dead-center single PNG */
+        /* Container keeping the arrows aligned next to the image */
+        .stage-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            user-select: none;
+        }
+
+        /* Smaller sizing configuration for your centered PNG/GIF */
         .centered-asset {
-            width: 150px; /* Forces the image to be smaller on all screens */
-            max-width: 50vw; /* Keeps it responsive on smaller mobile layouts */
+            width: 150px;
+            max-width: 50vw;
             height: auto;
             object-fit: contain;
             cursor: pointer;
-            image-rendering: pixelated; /* Keeps crisp pixel art borders if it's a sprite */
+            image-rendering: pixelated; /* Keeps crisp pixel art borders */
             -webkit-tap-highlight-color: transparent;
+            transition: transform 0.1s ease;
+        }
+
+        .centered-asset:active {
+            transform: scale(0.95);
+        }
+
+        /* Circular Arrow Buttons */
+        .nav-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* SVG arrows inside the circle */
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #ffffff;
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. YOUR CENTERED TARGET PNG -->
-    <img id="interactive-asset" src="./output-onlinepngtools.png" alt="Centered Asset" class="centered-asset">
+    <div class="stage-container">
+        <!-- Left Arrow Circle -->
+        <button id="prev-btn" class="nav-btn" aria-label="Previous">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+        </button>
 
-    <!-- 2. NO-LOOP AUDIO SYSTEM WITH YOUR EXACT SONG FILENAME -->
-    <audio id="single-track" src="./GoldenChild.mp3" preload="auto" crossorigin="anonymous"></audio>
+        <!-- Centered Interactive PNG/GIF -->
+        <img id="interactive-asset" src="./output-onlinepngtools.png" alt="Centered Asset" class="centered-asset">
+
+        <!-- Right Arrow Circle -->
+        <button id="next-btn" class="nav-btn" aria-label="Next">
+            <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+        </button>
+    </div>
+
+    <!-- AUDIO SYSTEM -->
+    <audio id="single-track" preload="auto" crossorigin="anonymous"></audio>
 
     <script>
-        const songTrack = document.getElementById('single-track');
-        const assetButton = document.getElementById('interactive-asset');
-        
+        // CONFIGURATION: Add as many items/scenes as you want here
+        const playlist = [
+            {
+                image: "./output-onlinepngtools.png",
+                // Single audio file
+                audio: "./GoldenChild.mp3"
+            },
+            {
+                image: "./second-gif.gif",
+                // Multiple audio files -> randomly picks one when switched to!
+                audio: [
+                    "./track1.mp3",
+                    "./track2.mp3",
+                    "./track3.mp3"
+                ]
+            },
+            {
+                image: "./third-asset.png",
+                audio: "./another-song.mp3"
+            }
+        ];
+
+        let currentIndex = 0;
         let audioPipelineActive = false;
 
-        function playSingleTrack(e) {
-            e.preventDefault();
+        const songTrack = document.getElementById('single-track');
+        const assetButton = document.getElementById('interactive-asset');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
 
-            // Web Audio API Pipeline Unlocking Layer (Ensures mobile compliance)
+        // Helper function to pick a track (handles random pools)
+        function getAudioSource(audioData) {
+            if (Array.isArray(audioData)) {
+                const randomIndex = Math.floor(Math.random() * audioData.length);
+                return audioData[randomIndex];
+            }
+            return audioData;
+        }
+
+        // Unlocks mobile Web Audio API restrictions on first interaction
+        function unlockAudioContext() {
             if (!audioPipelineActive) {
                 try {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     const audioCtx = new AudioContext();
-                    
                     const source = audioCtx.createMediaElementSource(songTrack);
                     source.connect(audioCtx.destination);
-                    
                     if (audioCtx.state === 'suspended') {
                         audioCtx.resume();
                     }
                 } catch(err) {
-                    console.log("AudioContext stream active.");
+                    console.log("AudioContext active.");
                 }
-                
                 audioPipelineActive = true;
             }
-
-            // Play the track seamlessly from the beginning
-            songTrack.currentTime = 0;
-            songTrack.play().catch(err => console.log("Audio play blocked:", err));
         }
 
-        // Binds clean click and mobile touch layouts directly to the central image
-        assetButton.addEventListener('click', playSingleTrack, { passive: false });
-        assetButton.addEventListener('touchstart', playSingleTrack, { passive: false });
+        // Load item and play audio
+        function loadItem(index, shouldPlay = true) {
+            unlockAudioContext();
+
+            currentIndex = (index + playlist.length) % playlist.length;
+            const currentItem = playlist[currentIndex];
+
+            // Change Image
+            assetButton.src = currentItem.image;
+
+            // Change Audio Source
+            const selectedAudio = getAudioSource(currentItem.audio);
+            songTrack.src = selectedAudio;
+            songTrack.currentTime = 0;
+
+            if (shouldPlay) {
+                songTrack.play().catch(err => console.log("Audio play blocked:", err));
+            }
+        }
+
+        // Replay current image audio when clicking directly on the central image
+        function playCurrentTrack(e) {
+            if (e) e.preventDefault();
+            loadItem(currentIndex, true);
+        }
+
+        // Event Listeners for image click
+        assetButton.addEventListener('click', playCurrentTrack);
+        assetButton.addEventListener('touchstart', playCurrentTrack, { passive: false });
+
+        // Event Listeners for switching arrows
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadItem(currentIndex - 1, true);
+        });
+
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            loadItem(currentIndex + 1, true);
+        });
+
+        // Initialize first item on page load (without auto-playing until user clicks)
+        loadItem(0, false);
     </script>
 
 </body>
