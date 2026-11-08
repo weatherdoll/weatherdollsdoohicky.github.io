@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Media Switcher</title>
     <style>
-        /* Creates a perfectly centered pitch-black canvas void */
         html, body {
             margin: 0;
             padding: 0;
@@ -19,7 +18,6 @@
             font-family: sans-serif;
         }
 
-        /* Container keeping the arrows aligned next to the image */
         .stage-container {
             display: flex;
             align-items: center;
@@ -28,14 +26,13 @@
             user-select: none;
         }
 
-        /* Smaller sizing configuration for your centered PNG/GIF */
         .centered-asset {
             width: 150px;
             max-width: 50vw;
             height: auto;
             object-fit: contain;
             cursor: pointer;
-            image-rendering: pixelated; /* Keeps crisp pixel art borders */
+            image-rendering: pixelated;
             -webkit-tap-highlight-color: transparent;
             transition: transform 0.1s ease;
         }
@@ -44,7 +41,19 @@
             transform: scale(0.95);
         }
 
-        /* Circular Arrow Buttons */
+        /* Fallback text style if image fails to load */
+        #error-fallback {
+            display: none;
+            color: #ff4d4d;
+            border: 1px dashed #ff4d4d;
+            padding: 15px;
+            text-align: center;
+            font-size: 0.85rem;
+            max-width: 250px;
+            background: rgba(255, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
         .nav-btn {
             width: 44px;
             height: 44px;
@@ -69,7 +78,6 @@
             transform: scale(0.9);
         }
 
-        /* SVG arrows inside the circle */
         .nav-btn svg {
             width: 20px;
             height: 20px;
@@ -85,8 +93,11 @@
             <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
         </button>
 
-        <!-- Centered Interactive PNG/GIF -->
-        <img id="interactive-asset" src="output-onlinepngtools.png" alt="Centered Asset" class="centered-asset">
+        <!-- Centered Interactive PNG/GIF & Error Box -->
+        <div>
+            <img id="interactive-asset" src="" alt="Centered Asset" class="centered-asset">
+            <div id="error-fallback">Image not found: <span id="missing-filename"></span></div>
+        </div>
 
         <!-- Right Arrow Circle -->
         <button id="next-btn" class="nav-btn" aria-label="Next">
@@ -98,14 +109,13 @@
     <audio id="single-track" preload="auto" crossorigin="anonymous"></audio>
 
     <script>
-        // CONFIGURATION: All your files mapped directly in the root folder
         const playlist = [
             {
                 image: "output-onlinepngtools.png",
                 audio: "GoldenChild.mp3"
             },
             {
-                image: "kitchen-piano.png", // Your piano image!
+                image: "kitchen-piano.png", 
                 audio: [
                     "Kris_piano_prophecy_music.ogg",
                     "Kris_piano_last_prophecy_music.ogg",
@@ -118,7 +128,7 @@
                 ]
             },
             {
-                image: "third-image.gif",  // Replace with your third image/gif filename when ready
+                image: "third-image.gif",  
                 audio: "another-song.mp3"
             }
         ];
@@ -128,10 +138,11 @@
 
         const songTrack = document.getElementById('single-track');
         const assetButton = document.getElementById('interactive-asset');
+        const errorFallback = document.getElementById('error-fallback');
+        const missingFilename = document.getElementById('missing-filename');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
 
-        // Helper function to pick a track (handles random pools)
         function getAudioSource(audioData) {
             if (Array.isArray(audioData)) {
                 const randomIndex = Math.floor(Math.random() * audioData.length);
@@ -140,7 +151,6 @@
             return audioData;
         }
 
-        // Unlocks mobile Web Audio API restrictions on first interaction
         function unlockAudioContext() {
             if (!audioPipelineActive) {
                 try {
@@ -158,17 +168,18 @@
             }
         }
 
-        // Load item and play audio
         function loadItem(index, shouldPlay = true) {
             unlockAudioContext();
 
             currentIndex = (index + playlist.length) % playlist.length;
             const currentItem = playlist[currentIndex];
 
-            // Change Image
+            // Reset image display and hide error first
+            errorFallback.style.display = 'none';
+            assetButton.style.display = 'block';
             assetButton.src = currentItem.image;
 
-            // Change Audio Source
+            // Audio Source
             const selectedAudio = getAudioSource(currentItem.audio);
             songTrack.src = selectedAudio;
             songTrack.currentTime = 0;
@@ -178,17 +189,21 @@
             }
         }
 
-        // Replay current image audio when clicking directly on the central image
+        // Catch if the image fails to load from the folder
+        assetButton.onerror = function() {
+            assetButton.style.display = 'none';
+            missingFilename.textContent = playlist[currentIndex].image;
+            errorFallback.style.display = 'block';
+        };
+
         function playCurrentTrack(e) {
             if (e) e.preventDefault();
             loadItem(currentIndex, true);
         }
 
-        // Event Listeners for image click
         assetButton.addEventListener('click', playCurrentTrack);
         assetButton.addEventListener('touchstart', playCurrentTrack, { passive: false });
 
-        // Event Listeners for switching arrows
         prevBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             loadItem(currentIndex - 1, true);
@@ -199,7 +214,6 @@
             loadItem(currentIndex + 1, true);
         });
 
-        // Initialize first item on page load (without auto-playing until user clicks)
         loadItem(0, false);
     </script>
 
