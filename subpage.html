@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>audio gif/png</title>
+    <title>Interactive Media Switcher</title>
     <style>
         html, body {
             margin: 0;
@@ -30,16 +30,23 @@
             z-index: 10;
         }
 
-        /* Bottom-Right Origin Link */
-        .origin-link {
+        /* Bottom-Right Origin Links Container */
+        .origin-container {
             position: absolute;
             bottom: 20px;
             right: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .origin-link {
             color: #ffffff;
             text-decoration: underline;
             font-size: 0.9rem;
             cursor: pointer;
-            z-index: 10;
         }
 
         .stage-container {
@@ -106,8 +113,11 @@
         </a>
     </div>
 
-    <!-- Origin Link (Bottom-Right) -->
-    <a href="#" id="audio-origin-link" class="origin-link" target="_blank">Audio Origin</a>
+    <!-- Origin Links (Bottom-Right) -->
+    <div class="origin-container">
+        <a href="https://youtu.be/RrQ_ljyckyg?si=BAm0TXC5x_UDVOny" id="audio-origin-link-1" class="origin-link" target="_blank">Audio Origin 1</a>
+        <a href="https://deltarune.wiki/index.php?title=Special%3ASearch&search=Unlisted+music+tracks%23Kris%27s+piano+tracks&wprov=acrw1_0" id="audio-origin-link-2" class="origin-link" target="_blank">Audio Origin 2</a>
+    </div>
 
     <!-- AUDIO SYSTEM -->
     <audio id="single-track" preload="auto" crossorigin="anonymous"></audio>
@@ -117,7 +127,8 @@
             {
                 image: "output-onlinepngtools.png",
                 audio: "GoldenChild.mp3",
-                origin: "#" // Replace with actual link later
+                origin1: "#", // Replace with first link later
+                origin2: "#"  // Replace with second link later
             },
             {
                 image: "kitchen-piano.png", 
@@ -131,12 +142,14 @@
                     "Kris_piano_quiz_music.ogg",
                     "Kris_piano_sevenfour_music.ogg"
                 ],
-                origin: "#" // Replace with actual link later
+                origin1: "#",
+                origin2: "#"
             },
             {
                 image: "third-image.gif",  
                 audio: "another-song.mp3",
-                origin: "#" // Replace with actual link later
+                origin1: "#",
+                origin2: "#"
             }
         ];
 
@@ -148,7 +161,8 @@
         const assetButton = document.getElementById('interactive-asset');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
-        const audioOriginLink = document.getElementById('audio-origin-link');
+        const audioOriginLink1 = document.getElementById('audio-origin-link-1');
+        const audioOriginLink2 = document.getElementById('audio-origin-link-2');
 
         function getAudioSource(audioData) {
             if (Array.isArray(audioData)) {
@@ -185,8 +199,9 @@
             songTrack.src = selectedAudio;
             songTrack.currentTime = 0;
 
-            // Update the bottom-right origin link for the current item
-            audioOriginLink.href = currentItem.origin;
+            // Update both origin links for the current item
+            audioOriginLink1.href = currentItem.origin1;
+            audioOriginLink2.href = currentItem.origin2;
         }
 
         assetLink.addEventListener('click', (e) => {
