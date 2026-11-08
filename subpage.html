@@ -86,7 +86,7 @@
         </button>
 
         <!-- Centered Interactive PNG/GIF -->
-        <img id="interactive-asset" src="./output-onlinepngtools.png" alt="Centered Asset" class="centered-asset">
+        <img id="interactive-asset" src="output-onlinepngtools.png" alt="Centered Asset" class="centered-asset">
 
         <!-- Right Arrow Circle -->
         <button id="next-btn" class="nav-btn" aria-label="Next">
@@ -98,25 +98,23 @@
     <audio id="single-track" preload="auto" crossorigin="anonymous"></audio>
 
     <script>
-        // CONFIGURATION: Add as many items/scenes as you want here
+        // CONFIGURATION: Just put the exact filenames here!
         const playlist = [
             {
-                image: "./output-onlinepngtools.png",
-                // Single audio file
-                audio: "./GoldenChild.mp3"
+                image: "output-onlinepngtools.png",
+                audio: "GoldenChild.mp3"
             },
             {
-                image: "./second-gif.gif",
-                // Multiple audio files -> randomly picks one when switched to!
+                image: "second-image.png", // Replace with your second image/gif filename
                 audio: [
-                    "./track1.mp3",
-                    "./track2.mp3",
-                    "./track3.mp3"
+                    "track1.mp3",          // Randomly picks one of these when switched to
+                    "track2.mp3",
+                    "track3.mp3"
                 ]
             },
             {
-                image: "./third-asset.png",
-                audio: "./another-song.mp3"
+                image: "third-image.gif",  // Replace with your third image/gif filename
+                audio: "another-song.mp3"
             }
         ];
 
