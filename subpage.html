@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Media Switcher</title>
+    <title>audio gif/png</title>
     <style>
         html, body {
             margin: 0;
@@ -18,6 +18,30 @@
             font-family: sans-serif;
         }
 
+        /* Top-Left Exit Button */
+        .exit-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #ffffff;
+            text-decoration: underline;
+            font-size: 1rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        /* Bottom-Right Origin Link */
+        .origin-link {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: #ffffff;
+            text-decoration: underline;
+            font-size: 0.9rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
         .stage-container {
             display: flex;
             align-items: center;
@@ -26,7 +50,6 @@
             user-select: none;
         }
 
-        /* Standard link wrapper for the image */
         .asset-link {
             display: inline-block;
             line-height: 0;
@@ -41,7 +64,6 @@
             image-rendering: pixelated;
         }
 
-        /* Standard link wrapper for the arrow buttons */
         .nav-link {
             width: 64px;
             height: 64px;
@@ -64,22 +86,28 @@
 </head>
 <body>
 
+    <!-- Exit Button (Top-Left) -->
+    <a href="https://weatherdoll.github.io/weatherdollsdoohicky.github.io/" class="exit-btn">Exit</a>
+
     <div class="stage-container">
-        <!-- Left Arrow as a standard Link -->
+        <!-- Left Arrow Link -->
         <a href="#" id="prev-btn" class="nav-link" aria-label="Previous">
             <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
         </a>
 
-        <!-- Centered PNG/GIF inside a standard link -->
+        <!-- Centered PNG/GIF Link -->
         <a href="#" id="asset-link" class="asset-link">
             <img id="interactive-asset" src="" alt="Centered Asset" class="centered-asset">
         </a>
 
-        <!-- Right Arrow as a standard Link -->
+        <!-- Right Arrow Link -->
         <a href="#" id="next-btn" class="nav-link" aria-label="Next">
             <svg viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
         </a>
     </div>
+
+    <!-- Origin Link (Bottom-Right) -->
+    <a href="#" id="audio-origin-link" class="origin-link" target="_blank">Audio Origin</a>
 
     <!-- AUDIO SYSTEM -->
     <audio id="single-track" preload="auto" crossorigin="anonymous"></audio>
@@ -88,7 +116,8 @@
         const playlist = [
             {
                 image: "output-onlinepngtools.png",
-                audio: "GoldenChild.mp3"
+                audio: "GoldenChild.mp3",
+                origin: "#" // Replace with actual link later
             },
             {
                 image: "kitchen-piano.png", 
@@ -101,11 +130,13 @@
                     "Kris_piano_lancer_waltz_music.ogg",
                     "Kris_piano_quiz_music.ogg",
                     "Kris_piano_sevenfour_music.ogg"
-                ]
+                ],
+                origin: "#" // Replace with actual link later
             },
             {
                 image: "third-image.gif",  
-                audio: "another-song.mp3"
+                audio: "another-song.mp3",
+                origin: "#" // Replace with actual link later
             }
         ];
 
@@ -117,6 +148,7 @@
         const assetButton = document.getElementById('interactive-asset');
         const prevBtn = document.getElementById('prev-btn');
         const nextBtn = document.getElementById('next-btn');
+        const audioOriginLink = document.getElementById('audio-origin-link');
 
         function getAudioSource(audioData) {
             if (Array.isArray(audioData)) {
@@ -152,9 +184,11 @@
             const selectedAudio = getAudioSource(currentItem.audio);
             songTrack.src = selectedAudio;
             songTrack.currentTime = 0;
+
+            // Update the bottom-right origin link for the current item
+            audioOriginLink.href = currentItem.origin;
         }
 
-        // Clicking the image link plays/restarts the sound
         assetLink.addEventListener('click', (e) => {
             e.preventDefault();
             unlockAudioContext();
@@ -162,13 +196,11 @@
             songTrack.play().catch(err => console.log("Audio play blocked:", err));
         });
 
-        // Left Arrow link click
         prevBtn.addEventListener('click', (e) => {
             e.preventDefault();
             loadItem(currentIndex - 1);
         });
 
-        // Right Arrow link click
         nextBtn.addEventListener('click', (e) => {
             e.preventDefault();
             loadItem(currentIndex + 1);
